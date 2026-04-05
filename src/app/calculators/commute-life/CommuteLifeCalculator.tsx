@@ -1,32 +1,33 @@
 "use client";
-import { useState, useMemo } from "react";
+import { Suspense, useMemo, useCallback } from "react";
 import { formatNumber } from "@/lib/format";
 import { NumberInput } from "@/components/NumberInput";
 import { ShareButton } from "@/components/ShareButton";
+import { SharedResultBanner } from "@/components/SharedResultBanner";
+import { useShareableState } from "@/hooks/useShareableState";
+import { useRouter, usePathname } from "next/navigation";
 
-export function CommuteLifeCalculator() {
-  const [oneWay, setOneWay] = useState("40");
-  const [yearsWorked, setYearsWorked] = useState("5");
-  const [yearsLeft, setYearsLeft] = useState("30");
+function Calculator() {
+  const [oneWay, setOneWay] = useShareableState("ow", "40");
+  const [yearsWorked, setYearsWorked] = useShareableState("yw", "5");
+  const [yearsLeft, setYearsLeft] = useShareableState("yl", "30");
+  const router = useRouter();
+  const pathname = usePathname();
+  const handleTryOwn = useCallback(() => { router.replace(pathname, { scroll: false }); setOneWay("40"); setYearsWorked("5"); setYearsLeft("30"); }, [router, pathname, setOneWay, setYearsWorked, setYearsLeft]);
 
   const result = useMemo(() => {
-    const ow = parseInt(oneWay);
-    const yw = parseInt(yearsWorked);
-    const yl = parseInt(yearsLeft);
+    const ow = parseInt(oneWay); const yw = parseInt(yearsWorked); const yl = parseInt(yearsLeft);
     if (!ow || !yw || !yl) return null;
-    const dailyMin = ow * 2;
-    const yearlyHours = (dailyMin * 250) / 60;
-    const pastHours = yearlyHours * yw;
-    const futureHours = yearlyHours * yl;
-    const totalHours = pastHours + futureHours;
-    const totalDays = totalHours / 24;
-    const totalMonths = totalDays / 30;
+    const yearlyHours = (ow * 2 * 250) / 60;
+    const totalHours = yearlyHours * (yw + yl);
+    const totalDays = Math.round(totalHours / 24);
     const dramas = Math.floor(totalHours / 16);
-    return { dailyMin, yearlyHours, pastHours, futureHours, totalHours, totalDays: Math.round(totalDays), totalMonths, dramas };
+    return { totalHours, totalDays, dramas };
   }, [oneWay, yearsWorked, yearsLeft]);
 
   return (
     <div className="space-y-6">
+      <SharedResultBanner onTryOwn={handleTryOwn} />
       <NumberInput label="편도 출퇴근 시간" value={oneWay} onChange={setOneWay} suffix="분" placeholder="40" />
       <div className="grid grid-cols-2 gap-4">
         <NumberInput label="지금까지 직장생활" value={yearsWorked} onChange={setYearsWorked} suffix="년" placeholder="5" />
@@ -35,29 +36,16 @@ export function CommuteLifeCalculator() {
       {result && (
         <div className="border-t pt-6 space-y-4">
           <div>
-            <p className="text-lg font-semibold">
-              직장생활 동안 출퇴근에 약 {formatNumber(result.totalDays)}일을 쓰게 됩니다.
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              총 {formatNumber(Math.round(result.totalHours))}시간 · 16부작 드라마 {formatNumber(result.dramas)}편 분량
-            </p>
+            <p className="text-lg font-semibold">출퇴근에 인생 {formatNumber(result.totalDays)}일을 씁니다.</p>
+            <p className="mt-1 text-sm text-muted-foreground">드라마 {formatNumber(result.dramas)}편 분량</p>
           </div>
-          <div className="space-y-2">
-            {[
-              { label: "하루 출퇴근", value: `${result.dailyMin}분` },
-              { label: "연간 출퇴근", value: `${formatNumber(Math.round(result.yearlyHours))}시간` },
-              { label: "지금까지 쓴 시간", value: `${formatNumber(Math.round(result.pastHours))}시간` },
-              { label: "앞으로 쓸 시간", value: `${formatNumber(Math.round(result.futureHours))}시간` },
-            ].map((item) => (
-              <div key={item.label} className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{item.label}</span>
-                <span className="num font-medium">{item.value}</span>
-              </div>
-            ))}
-          </div>
-          <ShareButton text={`출퇴근에 인생 ${formatNumber(result.totalDays)}일을 씁니다. 드라마 ${formatNumber(result.dramas)}편 분량.`} />
+          <ShareButton text={`출퇴근에 인생 ${formatNumber(result.totalDays)}일 쓴대... 드라마 ${formatNumber(result.dramas)}편이래 ㄷㄷ`} cta="친구한테 보내기" />
         </div>
       )}
     </div>
   );
+}
+
+export function CommuteLifeCalculator() {
+  return <Suspense><Calculator /></Suspense>;
 }
