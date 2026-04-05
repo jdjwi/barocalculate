@@ -67,7 +67,6 @@ function Calculator() {
           <ShareButton
             text={`부모님과 앞으로 만날 수 있는 날이 ${formatNumber(result.totalDays)}일뿐이래... 너도 계산해봐`}
             cta="친구한테 보내기"
-            storyData={{ title: "부모님과 남은 시간", value: `${formatNumber(result.totalDays)}일`, sub: `${formatNumber(result.totalMeetings)}번의 만남` }}
           />
         </div>
       )}

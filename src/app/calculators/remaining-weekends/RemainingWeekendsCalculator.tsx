@@ -52,7 +52,6 @@ function Calculator() {
           <ShareButton
             text={`은퇴까지 남은 주말이 ${formatNumber(result.weekends)}번뿐이래... 너는 몇 번 남았어?`}
             cta="친구한테 보내기"
-            storyData={{ title: "은퇴까지 남은 주말", value: `${formatNumber(result.weekends)}번`, sub: `이미 ${formatNumber(result.alreadyUsed)}번 씀` }}
           />
         </div>
       )}

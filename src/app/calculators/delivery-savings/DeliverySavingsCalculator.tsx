@@ -56,7 +56,7 @@ function Calculator() {
               ))}
             </div>
           )}
-          <ShareButton text={`배달비만 모았으면 1년에 ${formatWon(Math.round(result.yearly))}... 너는 얼마나 쓰고 있어?`} cta="친구한테 보내기" storyData={{ title: "배달비만 모았으면", value: `연 ${formatNumber(Math.round(result.yearly / 10000))}만원`, sub: "날리는 중" }} />
+          <ShareButton text={`배달비만 모았으면 1년에 ${formatWon(Math.round(result.yearly))}... 너는 얼마나 쓰고 있어?`} cta="친구한테 보내기" />
         </div>
       )}
     </div>
