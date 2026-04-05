@@ -71,6 +71,7 @@ function Calculator() {
           <ShareButton
             text={`나 인생 ${formatNumber(result.percent, 0)}%밖에 안 남았대... 남은 여름 ${result.remainingSummers}번이래 😱 너도 해봐`}
             cta="친구한테 보내기"
+            storyData={{ title: "내 인생 진행률", value: `${formatNumber(result.percent, 1)}%`, sub: `남은 여름 ${result.remainingSummers}번` }}
           />
         </>
       )}
