@@ -1,15 +1,26 @@
 "use client";
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useCallback } from "react";
 import { formatNumber } from "@/lib/format";
 import { NumberInput } from "@/components/NumberInput";
 import { ShareButton } from "@/components/ShareButton";
+import { SharedResultBanner } from "@/components/SharedResultBanner";
 import { useShareableState } from "@/hooks/useShareableState";
+import { useRouter, usePathname } from "next/navigation";
 
 function Calculator() {
   const [parentAge, setParentAge] = useShareableState("age", "60");
   const [meetFreq, setMeetFreq] = useShareableState("freq", "12");
   const [hoursPerMeet, setHoursPerMeet] = useShareableState("hours", "5");
+  const router = useRouter();
+  const pathname = usePathname();
   const parentLifespan = 85;
+
+  const handleTryOwn = useCallback(() => {
+    router.replace(pathname, { scroll: false });
+    setParentAge("60");
+    setMeetFreq("12");
+    setHoursPerMeet("5");
+  }, [router, pathname, setParentAge, setMeetFreq, setHoursPerMeet]);
 
   const result = useMemo(() => {
     const age = parseInt(parentAge);
@@ -20,11 +31,12 @@ function Calculator() {
     const totalMeetings = remainingYears * freq;
     const totalHours = totalMeetings * hours;
     const totalDays = Math.round(totalHours / 24);
-    return { remainingYears, totalMeetings, totalHours, totalDays };
+    return { totalMeetings, totalHours, totalDays };
   }, [parentAge, meetFreq, hoursPerMeet]);
 
   return (
     <div className="space-y-6">
+      <SharedResultBanner onTryOwn={handleTryOwn} />
       <NumberInput label="부모님 현재 나이" value={parentAge} onChange={setParentAge} suffix="세" placeholder="60" />
       <div className="grid grid-cols-2 gap-4">
         <NumberInput label="1년에 몇 번 만나나요" value={meetFreq} onChange={setMeetFreq} suffix="번" placeholder="12" />
@@ -52,7 +64,10 @@ function Calculator() {
               </div>
             ))}
           </div>
-          <ShareButton text={`부모님과 앞으로 만날 수 있는 시간은 약 ${formatNumber(result.totalDays)}일. ${formatNumber(result.totalMeetings)}번의 만남.`} />
+          <ShareButton
+            text={`부모님과 앞으로 만날 수 있는 날이 ${formatNumber(result.totalDays)}일뿐이래... 너도 계산해봐`}
+            cta="친구한테 보내기"
+          />
         </div>
       )}
     </div>

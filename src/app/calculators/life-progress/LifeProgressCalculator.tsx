@@ -1,12 +1,21 @@
 "use client";
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useCallback } from "react";
 import { formatNumber } from "@/lib/format";
 import { useShareableState } from "@/hooks/useShareableState";
 import { ShareButton } from "@/components/ShareButton";
+import { SharedResultBanner } from "@/components/SharedResultBanner";
+import { useRouter, usePathname } from "next/navigation";
 
 function Calculator() {
   const [birthDate, setBirthDate] = useShareableState("birth", "1995-01-01");
+  const router = useRouter();
+  const pathname = usePathname();
   const lifespan = 80;
+
+  const handleTryOwn = useCallback(() => {
+    router.replace(pathname, { scroll: false });
+    setBirthDate("1995-01-01");
+  }, [router, pathname, setBirthDate]);
 
   const result = useMemo(() => {
     if (!birthDate) return null;
@@ -28,6 +37,8 @@ function Calculator() {
 
   return (
     <div className="space-y-6">
+      <SharedResultBanner onTryOwn={handleTryOwn} />
+
       <div>
         <label className="block text-[13px] text-muted-foreground mb-1.5">생년월일</label>
         <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)}
@@ -57,7 +68,10 @@ function Calculator() {
               </div>
             ))}
           </div>
-          <ShareButton text={`내 인생 ${formatNumber(result.percent, 1)}% 진행됨. 남은 여름 ${result.remainingSummers}번.`} />
+          <ShareButton
+            text={`나 인생 ${formatNumber(result.percent, 0)}%밖에 안 남았대... 남은 여름 ${result.remainingSummers}번이래 😱 너도 해봐`}
+            cta="친구한테 보내기"
+          />
         </>
       )}
     </div>
